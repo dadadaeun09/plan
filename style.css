@@ -1,0 +1,482 @@
+/* 모든 요소와 가상 요소에 적용 */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0; /*여백 제거*/
+}
+/* 변수 모음*/
+:root {
+    --bg: #0e0e12;      /*배경*/
+    --surface: #16161d; /*카드배경*/
+    --surface2: #1e1e28; /*카드 안쪽 배경*/
+    --border: #2a2a38;   /*테두리*/
+    --accent: #7cadf2;   /*하늘 포인트*/
+    --accent2: #5078dc;  /*블루 포인트*/
+    --accent3: #38bdf8;  /*라이트블루 포인트*/
+    --text: #e2e2f0;     /*기본 글자*/
+    --text-muted: #6b6b88; /*흐린 글자*/
+    --success: #48ca78; /*완료*/
+    --danger: #f87171; /*삭제*/
+    --mono: 'DM Mono', monospace; /*숫자, 영문 폰트*/
+    --sans: 'Gowun Dodum', sans-serif; /*한글 폰트*/
+}
+body{
+    background: var(--bg);  /*변수 숨김*/
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh; /*최소 높이 설정*/
+    display: flex; /*요소 정렬*/
+    flex-direction: column; /*헤더, 메인 순서로 세로 배치*/
+    overflow-x: hidden; /*가로 스크롤 숨김*/
+}
+
+header{
+    position: relative; /*z-index 적용 위해 필요*/
+    z-index: 1; /*배경 장식 위에 표시*/
+    padding: 22px 40px; /*여백(위아래, 좌우)*/
+    display: flex;
+    align-items: center;
+    gap: 12px; /*요소 사이 간격*/
+    border-bottom: 1px solid var(--border); /*헤더 구분선*/
+    flex-shrink: 0; /*헤더 고정*/
+}
+
+/*헤더 점*/
+.logo-dot{
+    width: 10px; height: 10px;
+    border-radius: 50%; /*원형으로*/
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent); /*빛나는 효과*/
+    animation: pulse 2s ease-in-out infinite; /*애니메이션 반복*/
+}
+
+/*애니메이션 정의*/
+@keyframes pulse{
+    0%, 100% {opacity: 1; transform: scale(1); } /*시작 끝: 크기*/
+    50%       {opacity: 0.5; transform: scale(0.8);} /*중간: 작아지고 흐려짐*/
+}
+
+/*헤더 h1*/
+header h1{
+    font-family: var(--mono); /*폰트*/
+    font-size: 17px;
+    font-weight: 500; /*두께*/
+    letter-spacing: 0.05em; /*자간*/
+}
+
+/*헤더 날짜*/
+.header-date{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto; /*왼쪽 마진 최대=오른쪽 끝 정렬*/
+}
+
+main{
+    position: relative;
+    z-index: 1;
+    flex: 1; /*body 남은 공간 전부 차지*/
+    display: grid;
+    grid-template-columns: 1fr 1fr; /*두칸을 동일한 너비로*/
+    gap: 24px; /*카드 간격*/
+    padding: 32px 40px;
+    max-width: 1100px; /*너비 제한*/
+    margin: 0 auto;
+    width: 100%;
+}
+
+/*공통 디자인*/
+.card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/*카드 위 라벨 글자*/
+.card-label{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase; /*영문 자동 대문자*/
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/*라벨 글자 앞 선 추가*/
+.card-label::before{
+    content: ''; /*가상요소*/
+    display: inline-block;
+    width: 16px; height: 1px;
+    background: var(--text-muted);
+}
+
+/*뽀모도로 타이머*/
+/*타이머 가운데 정렬*/
+#pomodoro {
+    align-items: center;
+}
+
+/*모드 선택 탭 박스*/
+.mode-tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface2);
+    padding: 4px; /*상하좌우 전부 4px 여백*/
+    border-radius: 10px;
+}
+
+.mode-btn{
+    flex: 1;
+    padding: 7px 12px; /*상하 7px, 좌우 12px 여백*/
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--sans);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap; /*줄바꿈 방지*/
+}
+
+/*선택된 모드 버튼*/
+.mode-btn.active{
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+
+/*타이머랑 텍스트를 겹쳐서 보여주는 박스*/
+.timer-ring-wrap{
+    position: relative;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center; /*세로 가운데 정렬*/
+    justify-content: center; /*가로 가운데 정렬*/
+}
+
+/*링 위치 설정*/
+.timer-ring-wrap svg{
+    position: absolute; /*타이머 링 랩 기준으로 절대 위치*/
+    top: 0;
+    left: 0; /*박스 좌측 상단에 딱 맞게 붙임*/
+    transform: rotate(-90deg); /*svg 기본은 3시 방향에서 시작하므로 -90도 돌려 12시 방향에서 시작하도록 함*/
+}
+
+/*링 배경*/
+#ring-bg{
+    stroke: var(--surface2);
+}
+
+/*링 진행 표시*/
+#ring-progress{
+    stroke: var(--accent);
+    stroke-linecap: round; /*선 끝을 둥글게*/
+    filter: drop-shadow(0 0 6px var(--accent)); /*빛나는 효과*/
+    transition: stroke-dashoffset 1s linear; /*값이 바뀔 때 1초 동안 부드럽게 변함, 자바에서 값을 바꾸면 원이 줄어드는 애니메이션*/
+}
+
+/*원 가운데 시간, 텍스트*/
+.timer-inner{
+    text-align: center;
+    z-index: 1;
+}
+
+/*타이머 숫자*/
+#timer-display{
+    font-family: var(--mono);
+    font-size: 44px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1; 
+}
+
+/*숫자 아래 모드 텍스트*/
+#timer-mode-label{
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    letter-spacing: 0.1em;
+}
+
+/*뽀모도로 완료 횟수 점 4개*/
+.pomo-count{
+    display: flex;
+    gap: 6px;
+}
+
+/*점 하나(미완)*/
+.pomo-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+}
+
+/*점 하나(완)*/
+.pomo-dot.done{
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(124,173,242,0.5);
+}
+
+/*시작, 리셋 버튼*/
+.timer-btns{
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+/*버튼 공통*/
+.btn{
+    flex: 1; /*두 버튼이 공간을 똑같이 나눠 가짐*/
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2;
+}
+
+/*시작*/
+.btn-start{
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); /*135도 방향으로 그라데이션*/
+    color: white;
+    font-weight: 600;
+}
+
+/*시작 호버 효과*/
+.btn-start:hover{
+    opacity: 0.85; /*투명도*/
+    transform: translateY(-1px); /*1px 위로 올라가는 효과*/
+}
+
+/*시작 클릭*/
+.btn-start:active{
+    transform: translateY(0);
+}
+
+/*리셋*/
+.btn-reset{
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+/*리셋 호버*/
+.btn-reset:hover{
+    color: var(--text);
+    border-color: var(--text-muted);
+} 
+
+/*플래너*/
+/*타이틀*/
+.planner-header{
+    display: flex;
+    justify-content: space-between; /*좌 라벨, 우 날짜*/
+    align-items: center;
+}
+
+/*날짜*/
+.today-date{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent3);
+}
+
+/*입력창이랑 + 버튼 가로 배치*/
+.todo-input-wrap{
+    display: flex;
+    gap: 8px;
+}
+
+/*할 일 입력*/
+.todo-input{
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 16px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    outline: none; /*포커스 시 기본 테두리 제거*/
+    transition: border-color 0.2s;
+}
+
+/*입력창 텍스트 색*/
+.todo-input::placeholder{color: var(--text-muted);}
+
+/*입력창 클릭*/
+.todo-input:focus{border-color: var(--accent);}
+
+/* +추가*/
+.btn-add{
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0; /*입력창이 늘어나도 버튼 줄어듦x*/
+}
+
+/* + 호버*/
+.btn-add:hover{
+    opacity: 0.85;
+    transform: scale(1.05);
+}
+
+/*할 일 리스트 전체*/
+.todo-list{
+    list-style: none; /*기본 점 제거*/
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto; /*항목이 많아지면 세로 스크롤 생김*/
+    padding-right: 4px; /*스크롤바랑 리스트 사이 간격*/
+}
+
+/*스크롤바 전체 너비*/
+.todo-list::-webkit-scrollbar{width: 4px;}
+
+/*스크롤바 배경 트랙*/
+.todo-list::-webkit-scrollbar-track{background: transparent;}
+
+/*스크롤바 막대*/
+.todo-list::-webkit-scrollbar-thumb{
+    background: var(--border);
+    border-radius: 2px;
+}
+
+/*할 일 리스트 하나*/
+.todo-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all -.2s;
+    animation: slideIn 0.2s ease;
+}
+
+/*항목 추가 애니메이션*/
+@keyframes slideIn{
+    from{opacity: 0; transform: translateY(-6px);}
+    to{opacity: 1; transform: translateY(0);}
+}
+
+/*항목 호버*/
+.todo-item:hover{border-color: var(--accent);}
+
+/*항목 완료*/
+.todo-item.done{opacity: 0.45;}
+
+/*완료 항목 취소선*/
+.todo-item.done .todo-text {text-decoration: line-through;}
+
+/*체크박스*/
+.todo-check{
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 11px;
+}
+
+/*체크시 박스 변경*/
+.todo-item.done .todo-check{
+    background: var(--success);
+    border-color: var(--success);
+    color: #0e0e12;
+}
+
+/*할 일 텍스트*/
+.todo-text{
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+/*삭제 버튼*/
+.todo-del{
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all 0.15s;
+}
+
+/*항목 호버시 삭제 버튼 등장*/
+.todo-item:hover .todo-del{opacity:1;}
+
+/*삭제 호버시 색 변경*/
+.todo-del:hover{color: var(--danger);}
+
+/*할 일 없을 때 문구*/
+.todo-empty{
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 30px 0;
+    line-height: 2;
+}
+
+/*진행률 바 배경*/
+.progress-bar-wrap{
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 4px;
+    overflow: hidden; /*안에 있는 바 밖으로 삐져나오지 않게*/
+}
+
+/*진행률 바*/
+.progress-bar{
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+/*통계*/
+.stats{
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/*완료 개수 텍스트 색*/
+.stats span:last-child {color: var(--success);}
